@@ -1,0 +1,17 @@
+# 统一换行，避免 Windows 上 checkout 出 CRLF 导致 CI 里脚本/配置损坏
+* text=auto eol=lf
+
+# 二进制文件不做任何转换
+*.so   binary
+*.o    binary
+*.bin  binary
+*.img  binary
+*.zip  binary
+*.apk  binary
+*.png  binary
+*.jpg  binary
+*.db   binary
+*.fw   binary
+*.mbn  binary
+*.b0?  binary
+*.b1?  binary

@@ -1,0 +1,9 @@
+﻿# 浠ヤ笅鐩綍鐢?CI 鍦ㄦ瀯寤烘椂鐢熸垚锛屼笉瑕佹彁浜?out/
+.repo/
+kernel/
+kernel-src/
+build.log
+*.img
+*.zip
+
+# TWRP 缂栬瘧涓嶉渶瑕?vendor 涓撴湁搴擄紙瀹屾暣 ROM 鎵嶉渶瑕侊級锛岄伩鍏嶄粨搴撹繃澶?vendor/samsung/rubenswifi/proprietary/

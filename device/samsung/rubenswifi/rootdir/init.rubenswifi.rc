@@ -1,0 +1,28 @@
+# rubenswifi (SM-T360) 设备初始化
+# 注意：这里是骨架，随着 bring-up 推进需要按实际 HAL 逐个补 service
+
+on early-init
+    # 关闭 Knox/企业相关遗留
+    setprop ro.boot.sec_atd.tty /dev/ttyHSL0
+
+on post-fs-data
+    # WiFi MAC 与校准数据存放在 persist 分区
+    chown system system /persist
+    chmod 0771 /persist
+
+on boot
+    # 平台标识（部分 HAL 依赖）
+    setprop ro.hardware.audio.primary msm8226
+    setprop wifi.interface wlan0
+    setprop wifi.direct.interface p2p0
+
+# WCNSS（WiFi/BT 子系统）加载服务
+service wcnss_service /system/bin/wcnss_service
+    class main
+    user system
+    group system wifi net_raw
+    oneshot
+    disabled
+
+on property:init.svc.wcnss_service=stopped
+    start wcnss_service

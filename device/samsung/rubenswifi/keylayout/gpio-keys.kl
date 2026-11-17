@@ -1,0 +1,8 @@
+# 码值取自官方内核 DTS gpio_keys 节点的 linux,code
+# https://…/arch/arm/boot/dts/msm8226/msm8226-sec-rubenswifieur-r02.dtsi
+key 172   HOME
+key 115   VOLUME_UP
+key 114   VOLUME_DOWN
+key 254   APP_SWITCH
+key 158   BACK
+key 116   POWER
