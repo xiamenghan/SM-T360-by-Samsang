@@ -65,7 +65,6 @@ export TW_DEVICE_VERSION="${TW_DEVICE_VERSION:-lineage16-port}"
 echo "==> envsetup"
 set +u
 source build/envsetup.sh
-set -u
 
 echo "==> lunch omni_rubenswifi-eng"
 lunch omni_rubenswifi-eng
