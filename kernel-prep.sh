@@ -54,6 +54,12 @@ done
 # IR 遥控驱动引用的 set_led_flash 只在 CONFIG_LEDS_MAX77804K 下编译
 enable_opt CONFIG_MFD_MAX77804K "$DST"
 enable_opt CONFIG_LEDS_MAX77804K "$DST"
+enable_opt CONFIG_MAX77804K_MUIC "$DST"
+
+# matisse 用的 SM5502 MUIC 与 MAX77804K 路径在同一文件里重复定义 switch_dock，
+# 必须关掉（rubens 硬件是 MAX77804K）
+disable_opt CONFIG_SM5502_MUIC "$DST"
+disable_opt CONFIG_MUIC_SM5502_SUPPORT_LANHUB_TA "$DST"
 
 # 平台必须存在，否则内核连 mach/ 头文件都找不到
 for opt in CONFIG_ARCH_MSM CONFIG_ARCH_MSM8226; do
