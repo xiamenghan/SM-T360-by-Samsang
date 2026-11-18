@@ -43,6 +43,8 @@ endif
 # ---------------------------------------------------------------- 内核
 TARGET_KERNEL_CONFIG := msm8226-sec_rubenswifi_defconfig
 TARGET_KERNEL_SOURCE := kernel/samsung/msm8226
+# msm 3.4 内核产物是 zImage；缺此变量时构建系统会拿 arch/arm/boot/ 目录当文件拷贝
+BOARD_KERNEL_IMAGE_NAME := zImage
 
 BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 androidboot.bootdevice=msm_sdcc.1
 BOARD_KERNEL_BASE := 0x00008000
