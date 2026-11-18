@@ -56,17 +56,22 @@ jobs:
           echo "JAVA_HOME=/usr/lib/jvm/temurin-8-jdk-amd64" >> $GITHUB_ENV
           echo "/usr/lib/jvm/temurin-8-jdk-amd64/bin" >> $GITHUB_PATH
 
-      - name: 兼容 Android 9 预编译 clang（libtinfo5）
+      - name: 兼容 Android 9 预编译工具链（libtinfo5/libncurses5）
         run: |
-          # Ubuntu 22.04 只有 libtinfo.so.6，AOSP Pie 的预编译 clang 5.0 需要 .so.5
+          # Ubuntu 22.04 只有 .so.6，AOSP Pie 的预编译 clang 5.0 需要 libtinfo.so.5，
+          # clang-tools 里的 header-abi-dumper 还需要 libncurses.so.5
           sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu focal main universe" || true
           sudo apt-get update -o Acquire::Retries=3 || true
-          sudo apt-get install -y libtinfo5 || true
+          sudo apt-get install -y libtinfo5 libncurses5 || true
           if [ ! -e /lib/x86_64-linux-gnu/libtinfo.so.5 ]; then
             echo "libtinfo5 未装上，改用软链兜底"
             sudo ln -sf /lib/x86_64-linux-gnu/libtinfo.so.6 /lib/x86_64-linux-gnu/libtinfo.so.5
           fi
-          ls -l /lib/x86_64-linux-gnu/libtinfo.so.5*
+          if [ ! -e /lib/x86_64-linux-gnu/libncurses.so.5 ]; then
+            echo "libncurses5 未装上，改用软链兜底"
+            sudo ln -sf /lib/x86_64-linux-gnu/libncurses.so.6 /lib/x86_64-linux-gnu/libncurses.so.5
+          fi
+          ls -l /lib/x86_64-linux-gnu/libtinfo.so.5* /lib/x86_64-linux-gnu/libncurses.so.5* || true
           sudo add-apt-repository -y --remove "deb http://archive.ubuntu.com/ubuntu focal main universe" || true
           sudo apt-get update -o Acquire::Retries=3 || true
 
