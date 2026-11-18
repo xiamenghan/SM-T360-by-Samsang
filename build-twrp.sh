@@ -3,7 +3,7 @@
 # 在当前目录（即仓库根，同时作为 AOSP 根）内编译 TWRP recovery.img
 # 本脚本可在 GitHub Actions 或任意 Ubuntu 20.04/22.04 上运行
 #
-set -euo pipefail
+set -eo pipefail
 
 MANIFEST="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git"
 TWRP_BRANCH="${TWRP_BRANCH:-twrp-9.0}"
