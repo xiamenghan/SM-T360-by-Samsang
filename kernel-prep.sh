@@ -48,7 +48,18 @@ done
 echo "    → $DST 已生成"
 grep -E "^(CONFIG_ARCH_MSM8226|CONFIG_SEC_RUBENS|CONFIG_MACH_RUBENS)" "$DST" | sed 's/^/       /'
 
-echo "==> 2/2 检查 DTS 与 dtb 列表"
+echo "==> 2/3 修补 mdnie 的 rubens 头文件引用"
+# 社区内核的 mdnie 驱动缺 CONFIG_SEC_RUBENS_PROJECT 分支，
+# 导致 COLOR_BLIND_1..6 未定义（这些符号在 mdnie_tft_data_rubens.h 中）
+MDNIE=drivers/video/msm/mdss/mdnie_tft_msm8x26.c
+if grep -q "mdnie_tft_data_rubens.h" "$MDNIE"; then
+    echo "    已包含，跳过"
+else
+    sed -i '/#include "mdnie_tft_data_millet.h"/a #elif defined(CONFIG_SEC_RUBENS_PROJECT)\n#include "mdnie_tft_data_rubens.h"' "$MDNIE"
+    echo "    → 已插入 rubens 分支"
+fi
+
+echo "==> 3/3 检查 DTS 与 dtb 列表"
 DTS_DIR=arch/arm/boot/dts/msm8226
 for f in msm8226-sec-rubenswifieur-r02.dts \
          msm8226-sec-rubenswifieur-r03.dts \
