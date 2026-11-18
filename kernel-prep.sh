@@ -27,6 +27,12 @@ for opt in CONFIG_SEC_MATISSE_PROJECT CONFIG_SEC_MATISSEWIFI_COMMON CONFIG_MACH_
     sed -i "s/^${opt}=y/# ${opt} is not set/" "$DST"
 done
 
+# 面板：matisse 用 TC_DSI2LVDS，rubens/millet 用 SDC WXGA
+# LP8556-backlight.c 里的 channel_setting_rev1 只在 SDC_WXGA_PANEL + RUBENS_PROJECT 下定义
+sed -i "s/^CONFIG_FB_MSM_MDSS_TC_DSI2LVDS_WXGA_PANEL=y/# CONFIG_FB_MSM_MDSS_TC_DSI2LVDS_WXGA_PANEL is not set/" "$DST"
+sed -i "/^CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL/d; /^# CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL is not set/d" "$DST"
+echo "CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL=y" >> "$DST"
+
 # 打开 rubenswifi 机型宏（内核 Kconfig / Makefile.boot 已原生支持）
 for opt in CONFIG_SEC_RUBENS_PROJECT CONFIG_SEC_RUBENSWIFI_COMMON CONFIG_MACH_RUBENSWIFI_OPEN; do
     sed -i "/^# *${opt} is not set/d" "$DST"
