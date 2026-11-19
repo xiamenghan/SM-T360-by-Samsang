@@ -71,9 +71,24 @@ echo "==> lunch omni_rubenswifi-eng"
 lunch omni_rubenswifi-eng
 
 echo "==> 开始编译 recoveryimage"
+set +e
 mka recoveryimage -j"$JOBS"
+BUILD_RC=$?
+set -e
 
 OUT="out/target/product/rubenswifi"
 echo
+echo "==> 尺寸报告（分区上限 10,485,760 字节）"
+ls -l "$OUT"/recovery.img "$OUT"/kernel "$OUT"/ramdisk.img "$OUT"/dt.img 2>/dev/null || true
+for f in "$OUT"/recovery.img "$OUT"/kernel "$OUT"/ramdisk.img; do
+    [ -f "$f" ] && echo "    $(basename $f): $(stat -c%s "$f") 字节"
+done
+
+if [ $BUILD_RC -ne 0 ]; then
+    echo "!! 编译失败（rc=$BUILD_RC），详见上方输出"
+    exit $BUILD_RC
+fi
+
+echo
 echo "==> 产物："
-ls -lh "$OUT"/recovery.img 2>/dev/null || { echo "未找到 recovery.img，编译失败"; exit 1; }
+ls -lh "$OUT"/recovery.img

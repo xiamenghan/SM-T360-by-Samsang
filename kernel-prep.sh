@@ -70,8 +70,10 @@ for opt in CONFIG_ARCH_MSM CONFIG_ARCH_MSM8226; do
 done
 
 # ---------------------------------------------------------------- 瘦身
-# recovery.img 必须装进 10MB 分区；recovery 用不到的子系统全部关闭
-# WLAN/Prima/WCNSS、相机(MSMB/SR130PC20)、视频编解码、音频、蓝牙、IR
+# recovery.img 必须装进 10MB 分区；recovery 用不到的子系统尽量关闭。
+# 注意：音频(CONFIG_SND)不能单独关——CONFIG_MSM_AUDIO_QDSP6V2 仍会编译
+# arch/arm/mach-msm/qdsp6v2/，与关闭 SND 后的头文件产生类型冲突。
+# WLAN/Prima/WCNSS、相机(MSMB/SR130PC20)、视频编解码、蓝牙、IR
 for opt in CONFIG_WLAN CONFIG_PRONTO_WLAN \
            CONFIG_WCNSS_CORE CONFIG_WCNSS_CORE_PRONTO \
            CONFIG_WCNSS_MEM_PRE_ALLOC CONFIG_WCNSS_REGISTER_DUMP_ON_BITE \
@@ -80,7 +82,7 @@ for opt in CONFIG_WLAN CONFIG_PRONTO_WLAN \
            CONFIG_PRIMA_WLAN_11AC_HIGH_TP CONFIG_WLAN_FEATURE_11W \
            CONFIG_MSMB_CAMERA CONFIG_MSM_CAMERA_SENSOR CONFIG_SR130PC20 \
            CONFIG_MSM_VIDC_V4L2 \
-           CONFIG_SND CONFIG_BT \
+           CONFIG_BT \
            CONFIG_IR_REMOCON_MC96 CONFIG_IR_REMOCON_MC96FR116 \
            CONFIG_IR_NEC_DECODER CONFIG_IR_RC5_DECODER CONFIG_IR_RC6_DECODER \
            CONFIG_IR_JVC_DECODER CONFIG_IR_SONY_DECODER CONFIG_IR_RC5_SZ_DECODER \

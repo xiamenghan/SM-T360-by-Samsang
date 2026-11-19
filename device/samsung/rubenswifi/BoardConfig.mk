@@ -91,6 +91,7 @@ TW_HAS_DOWNLOAD_MODE := true
 TW_NO_REBOOT_BOOTLOADER := true
 TW_EXCLUDE_SUPERSU := true
 # logcat 会增大 ramdisk（recovery.img 需装进 10MB 分区）
+TW_EXCLUDE_TWRPAPP := true
 TWRP_INCLUDE_ADDON := false
 
 # ---------------------------------------------------------------- 其他
