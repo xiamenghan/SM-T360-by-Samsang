@@ -69,6 +69,28 @@ for opt in CONFIG_ARCH_MSM CONFIG_ARCH_MSM8226; do
     grep -q "^${opt}=y" "$DST" || { echo "缺少 ${opt}=y，基底 defconfig 不合适"; exit 1; }
 done
 
+# ---------------------------------------------------------------- 瘦身
+# recovery.img 必须装进 10MB 分区；recovery 用不到的子系统全部关闭
+# WLAN/Prima/WCNSS、相机(MSMB/SR130PC20)、视频编解码、音频、蓝牙、IR
+for opt in CONFIG_WLAN CONFIG_PRONTO_WLAN \
+           CONFIG_WCNSS_CORE CONFIG_WCNSS_CORE_PRONTO \
+           CONFIG_WCNSS_MEM_PRE_ALLOC CONFIG_WCNSS_REGISTER_DUMP_ON_BITE \
+           CONFIG_WCNSS_IRIS_REGISTER_DUMP \
+           CONFIG_PRIMA_WLAN_LFR CONFIG_PRIMA_WLAN_OKC \
+           CONFIG_PRIMA_WLAN_11AC_HIGH_TP CONFIG_WLAN_FEATURE_11W \
+           CONFIG_MSMB_CAMERA CONFIG_MSM_CAMERA_SENSOR CONFIG_SR130PC20 \
+           CONFIG_MSM_VIDC_V4L2 \
+           CONFIG_SND CONFIG_BT \
+           CONFIG_IR_REMOCON_MC96 CONFIG_IR_REMOCON_MC96FR116 \
+           CONFIG_IR_NEC_DECODER CONFIG_IR_RC5_DECODER CONFIG_IR_RC6_DECODER \
+           CONFIG_IR_JVC_DECODER CONFIG_IR_SONY_DECODER CONFIG_IR_RC5_SZ_DECODER \
+           CONFIG_IR_SANYO_DECODER CONFIG_IR_MCE_KBD_DECODER CONFIG_IR_LIRC_CODEC; do
+    disable_opt "$opt" "$DST"
+done
+
+# ramdisk 改用 XZ 压缩（build-twrp.sh 会把 MINIGZIP 替换为 xz），内核需支持 XZ initramfs
+enable_opt CONFIG_RD_XZ "$DST"
+
 echo "    → $DST 已生成"
 grep -E "^(CONFIG_ARCH_MSM8226|CONFIG_SEC_RUBENS|CONFIG_MACH_RUBENS|CONFIG_MFD_MAX77804K|CONFIG_LEDS_MAX77804K|CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL)" "$DST" | sed 's/^/       /'
 

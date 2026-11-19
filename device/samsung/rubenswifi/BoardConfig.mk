@@ -90,7 +90,7 @@ TW_SCREEN_BLANK_ON_BOOT := true
 TW_HAS_DOWNLOAD_MODE := true
 TW_NO_REBOOT_BOOTLOADER := true
 TW_EXCLUDE_SUPERSU := true
-TWRP_INCLUDE_LOGCAT := true
+# logcat 会增大 ramdisk（recovery.img 需装进 10MB 分区）
 TWRP_INCLUDE_ADDON := false
 
 # ---------------------------------------------------------------- 其他
