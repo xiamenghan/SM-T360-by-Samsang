@@ -36,7 +36,27 @@ echo "==> 准备内核 defconfig"
 # 该内核仓库自带 rubenswifi DTS、dtb 列表与可用的 lineage_* 基底 defconfig
 bash ./kernel-prep.sh kernel/samsung/msm8226
 
-# ---------------------------------------------------------------- 3. 编译
+# ---------------------------------------------------------------- 3. ramdisk XZ 压缩
+echo "==> ramdisk 压缩改为 XZ（10MB 分区，gzip 装不下）"
+# 内核侧已开 CONFIG_RD_XZ（kernel-prep.sh），其解码器用 vmalloc 分配字典，8MB 字典安全。
+mkdir -p tools
+cat > tools/minigzip-xz <<'XZEOF'
+#!/bin/bash
+# 兼容 minigzip 的管道调用方式：mkbootfs ... | minigzip > out.img
+exec xz -6e -c "$@"
+XZEOF
+chmod +x tools/minigzip-xz
+GZDEF="$(grep -l '^MINIGZIP := ' build/make/core/config.mk build/core/config.mk 2>/dev/null || true)"
+if [ -z "$GZDEF" ]; then
+    echo "!! 找不到 MINIGZIP 定义，构建树结构与预期不符"
+    exit 1
+fi
+for f in $GZDEF; do
+    sed -i "s|^MINIGZIP := .*|MINIGZIP := $PWD/tools/minigzip-xz|" "$f"
+    echo "    已替换 $f"
+done
+
+# ---------------------------------------------------------------- 4. 编译
 export ALLOW_MISSING_DEPENDENCIES=true
 export LC_ALL=C
 export TZ=UTC
