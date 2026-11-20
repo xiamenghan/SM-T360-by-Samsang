@@ -28,7 +28,7 @@ disable_opt() {
     echo "# ${opt} is not set" >> "$dst"
 }
 
-echo "==> 1/3 生成 defconfig"
+echo "==> 1/4 生成 defconfig"
 SRC=arch/arm/configs/lineage_matissewifi_defconfig
 DST=arch/arm/configs/msm8226-sec_rubenswifi_defconfig
 [ -f "$SRC" ] || { echo "找不到 $SRC"; exit 1; }
@@ -103,7 +103,7 @@ echo "==> 2/4 精简 dtb 列表（只留 HW rev 3）"
 # rubens 默认会编 5 个 dtb（r00..r04），dt.img 739KB；只留 r03 可省约 590KB。
 BOOTMK=arch/arm/mach-msm/Makefile.boot
 if grep -qE '^[[:space:]]*dtb-.*rubenswifieur-r0(0|1|2|4)\.dtb' "$BOOTMK"; then
-    sed -i -E 's|^([[:space:]]*)(dtb-.*rubenswifieur-r0(0|1|2|4)\.dtb)|\1# \2|' "$BOOTMK"
+    sed -i -E 's~^([[:space:]]*)(dtb-.*rubenswifieur-r0(0|1|2|4)\.dtb)~\1# \2~' "$BOOTMK"
     echo "    → 已注释掉 r00/r01/r02/r04"
 else
     echo "    已是精简状态，跳过"
