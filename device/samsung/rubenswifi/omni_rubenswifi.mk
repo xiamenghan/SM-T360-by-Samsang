@@ -5,7 +5,12 @@
 # 不含 LineageOS 的 vendor/lineage 与 msm8226-common，需要自包含
 #
 
+# TWRP 基座：9.0 manifest 在 vendor/omni，8.1 manifest 可能在 vendor/twrp
+ifneq ($(wildcard vendor/omni/config/common.mk),)
 $(call inherit-product, vendor/omni/config/common.mk)
+else ifneq ($(wildcard vendor/twrp/config/common.mk),)
+$(call inherit-product, vendor/twrp/config/common.mk)
+endif
 
 # 专有文件（若已放置 vendor/samsung/rubenswifi）
 $(call inherit-product-if-exists, vendor/samsung/rubenswifi/rubenswifi-vendor.mk)

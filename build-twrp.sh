@@ -6,7 +6,9 @@
 set -eo pipefail
 
 MANIFEST="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git"
-TWRP_BRANCH="${TWRP_BRANCH:-twrp-9.0}"
+# 用 8.1(Oreo)：msm8226 三星平板最成熟的 TWRP 基座，ramdisk 比 9.0 小得多，
+# 能直接装进 10MB recovery 分区，无需 xz/砍 dtb 等有启动风险的骚操作
+TWRP_BRANCH="${TWRP_BRANCH:-twrp-8.1}"
 KERNEL_REPO="https://github.com/LineageOS/android_kernel_samsung_msm8226.git"
 KERNEL_BRANCH="${KERNEL_BRANCH:-lineage-16.0}"
 
@@ -34,30 +36,7 @@ echo "==> 准备内核 defconfig"
 # 该内核仓库自带 rubenswifi DTS、dtb 列表与可用的 lineage_* 基底 defconfig
 bash ./kernel-prep.sh kernel/samsung/msm8226
 
-# ---------------------------------------------------------------- 3. ramdisk XZ 压缩
-echo "==> ramdisk 压缩改为 XZ（recovery 分区 10MB，gzip 版本装不下）"
-# AOSP 的 ramdisk 由 MINIGZIP(minigzip) 以 gzip 压缩；换成 xz 可再省 ~2MB。
-# 内核侧已开 CONFIG_RD_XZ（kernel-prep.sh），可正常解压 XZ initramfs。
-# 用 -6e 预设：8MB 字典（内核早期解压内存友好）+ extreme 模式多榨一点压缩率
-mkdir -p tools
-cat > tools/minigzip-xz <<'XZEOF'
-#!/bin/bash
-# 兼容 minigzip 的管道调用方式：mkbootfs ... | minigzip > out.img
-exec xz -6e -c "$@"
-XZEOF
-chmod +x tools/minigzip-xz
-GZDEF="$(grep -l '^MINIGZIP := ' build/make/core/config.mk build/core/config.mk 2>/dev/null || true)"
-if [ -z "$GZDEF" ]; then
-    echo "!! 找不到 MINIGZIP 定义，构建树结构与预期不符，退出以便人工确认"
-    exit 1
-fi
-for f in $GZDEF; do
-    sed -i "s|^MINIGZIP := .*|MINIGZIP := $PWD/tools/minigzip-xz|" "$f"
-    echo "    已替换 $f"
-done
-grep -rn '^MINIGZIP := ' build/make/core/config.mk build/core/config.mk 2>/dev/null | sed 's/^/    /'
-
-# ---------------------------------------------------------------- 4. 编译
+# ---------------------------------------------------------------- 3. 编译
 export ALLOW_MISSING_DEPENDENCIES=true
 export LC_ALL=C
 export TZ=UTC

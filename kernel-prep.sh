@@ -92,25 +92,14 @@ for opt in CONFIG_MSM_VIDC_V4L2 \
     disable_opt "$opt" "$DST"
 done
 
-# ramdisk 改用 XZ 压缩（build-twrp.sh 会把 MINIGZIP 替换为 xz），内核需支持 XZ initramfs
-enable_opt CONFIG_RD_XZ "$DST"
+# ramdisk 保持 AOSP 默认 gzip（8.1 基座体积足够，不引入解压风险）
 
 echo "    → $DST 已生成"
 grep -E "^(CONFIG_ARCH_MSM8226|CONFIG_SEC_RUBENS|CONFIG_MACH_RUBENS|CONFIG_MFD_MAX77804K|CONFIG_LEDS_MAX77804K|CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL)" "$DST" | sed 's/^/       /'
 
-echo "==> 2/4 精简 dtb 列表（只留 HW rev 3）"
-# 本机 ro.revision=3，对应 msm8226-sec-rubenswifieur-r03.dtb。
-# rubens 默认会编 5 个 dtb（r00..r04），dt.img 739KB；只留 r03 可省约 590KB。
-BOOTMK=arch/arm/mach-msm/Makefile.boot
-if grep -qE '^[[:space:]]*dtb-.*rubenswifieur-r0(0|1|2|4)\.dtb' "$BOOTMK"; then
-    sed -i -E 's~^([[:space:]]*)(dtb-.*rubenswifieur-r0(0|1|2|4)\.dtb)~\1# \2~' "$BOOTMK"
-    echo "    → 已注释掉 r00/r01/r02/r04"
-else
-    echo "    已是精简状态，跳过"
-fi
-grep -E 'rubenswifieur.*dtb' "$BOOTMK" | sed 's/^/       /'
+# 保留全部 5 个 dtb（r00..r04）：体积换稳妥，避免硬件版本不匹配导致不启动
 
-echo "==> 3/4 修补 mdnie 的 rubens 头文件引用"
+echo "==> 2/3 修补 mdnie 的 rubens 头文件引用"
 # 社区内核的 mdnie 驱动缺 CONFIG_SEC_RUBENS_PROJECT 分支，
 # 导致 COLOR_BLIND_1..6 未定义（这些符号在 mdnie_tft_data_rubens.h 中）
 MDNIE=drivers/video/msm/mdss/mdnie_tft_msm8x26.c
@@ -121,7 +110,7 @@ else
     echo "    → 已插入 rubens 分支"
 fi
 
-echo "==> 4/4 检查 DTS 与 dtb 列表"
+echo "==> 3/3 检查 DTS 与 dtb 列表"
 DTS_DIR=arch/arm/boot/dts/msm8226
 for f in msm8226-sec-rubenswifieur-r02.dts \
          msm8226-sec-rubenswifieur-r03.dts \
