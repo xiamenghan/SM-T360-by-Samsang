@@ -77,11 +77,20 @@ done
 #   - CONFIG_WCNSS_CORE 不能关：board 的 msm8226-thermistor.c 链接时引用
 #     wcnss_wlan_power / wcnss_get_platform_device 等
 #   - CONFIG_MSMB_CAMERA 不能关：k2hh.c 引用 led_flash_en / camera_class
-# 因此只关闭与 board 无链接依赖的叶子驱动：视频编解码 + 红外解码器
+# 因此只关闭与 board 无链接依赖的叶子驱动：
+#   - 视频编解码 / 红外解码器
+#   - Prima WLAN 驱动（PRONTO_WLAN，但保留 WCNSS_CORE 给 board 用）
+#   - 相机整组（core+framework+两个 sensor 必须同时关，否则 sensor 引用 camera_class）
+#   - KALLSYMS（recovery 不需要符号表）
 for opt in CONFIG_MSM_VIDC_V4L2 \
            CONFIG_IR_NEC_DECODER CONFIG_IR_RC5_DECODER CONFIG_IR_RC6_DECODER \
            CONFIG_IR_JVC_DECODER CONFIG_IR_SONY_DECODER CONFIG_IR_RC5_SZ_DECODER \
-           CONFIG_IR_SANYO_DECODER CONFIG_IR_MCE_KBD_DECODER CONFIG_IR_LIRC_CODEC; do
+           CONFIG_IR_SANYO_DECODER CONFIG_IR_MCE_KBD_DECODER CONFIG_IR_LIRC_CODEC \
+           CONFIG_PRONTO_WLAN CONFIG_PRIMA_WLAN_LFR CONFIG_PRIMA_WLAN_OKC \
+           CONFIG_PRIMA_WLAN_11AC_HIGH_TP \
+           CONFIG_MSMB_CAMERA CONFIG_MSM_CAMERA_SENSOR CONFIG_SR130PC20 \
+           CONFIG_SENSORS_K2HH \
+           CONFIG_KALLSYMS; do
     disable_opt "$opt" "$DST"
 done
 
