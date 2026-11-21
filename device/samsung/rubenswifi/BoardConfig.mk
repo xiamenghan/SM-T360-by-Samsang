@@ -100,7 +100,8 @@ DEVICE_RESOLUTION := 800x1280
 TW_BRIGHTNESS_PATH := /sys/class/leds/lcd-backlight/brightness
 TW_MAX_BRIGHTNESS := 255
 TW_DEFAULT_BRIGHTNESS := 160
-TW_SCREEN_BLANK_ON_BOOT := true
+# 诊断阶段先不熄屏：黑屏无法区分「TWRP 没起来」和「起来了但被熄屏」
+TW_SCREEN_BLANK_ON_BOOT := false
 TW_HAS_DOWNLOAD_MODE := true
 TW_NO_REBOOT_BOOTLOADER := true
 TW_EXCLUDE_SUPERSU := true

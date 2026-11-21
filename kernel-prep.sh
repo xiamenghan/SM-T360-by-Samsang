@@ -57,19 +57,15 @@ enable_opt CONFIG_LEDS_MAX77804K "$DST"
 # MAX77804K_CHGIN_IM 等中断位定义在 max77804k_charger.h，
 # 只有开启 CONFIG_CHARGER_MAX77804K 才会被 max77804k.h->sec_charger.h 引入
 enable_opt CONFIG_CHARGER_MAX77804K "$DST"
-# 以下选项对齐三星原厂 variant defconfig（msm8926-sec_rubenslte_defconfig）：
-#   - REGULATOR_MAX77804K：safeout 等 3 路 regulator，缺失会让依赖它的设备 probe 失败
-# 注意（2026-11-21 实测，勿重复踩）：
-#   - 原厂用 EXTCON_MAX77804K + 关闭 MAX77804K_MUIC 来提供 muic_otg_control；
-#     但在本社区内核上，extcon-max77804k.c 会引用未编译的 mxt_tsp_register_callback
-#     （IR remocon 也有同样问题），导致链接失败。
-#   - 因此这里保留「MAX77804K_MUIC=y + EXTCON 关闭」这条被验证可编译的路径。
-enable_opt CONFIG_REGULATOR_MAX77804K "$DST"
+# 2026-11-21 晚实测：开启 REGULATOR_MAX77804K / TOUCHSCREEN_SYNAPTICS_I2C_RMI4 后，
+# 设备变成「黑屏后自动重启」——疑似这两个驱动 probe 时 i2c 卡死触发看门狗。
+# 先回到「只改 cmdline」的最小变量组合定位问题，后续再单独加回。
+# enable_opt CONFIG_REGULATOR_MAX77804K "$DST"
 enable_opt CONFIG_MAX77804K_MUIC "$DST"
 
 # 触摸：rubens 使用 Synaptics RMI4（DTS 节点 compatible = "synaptics,rmi4-ts"）。
-# 基底 defconfig 未开触摸驱动，TWRP 会完全没有触摸。
-enable_opt CONFIG_TOUCHSCREEN_SYNAPTICS_I2C_RMI4 "$DST"
+# 2026-11-21 晚先关闭，排除其 probe 卡死导致看门狗重启的可能。
+# enable_opt CONFIG_TOUCHSCREEN_SYNAPTICS_I2C_RMI4 "$DST"
 
 # matisse 用的 SM5502 MUIC / SMB358 充电器与 rubens 的 MAX77804K 方案冲突，必须关掉
 disable_opt CONFIG_SM5502_MUIC "$DST"
