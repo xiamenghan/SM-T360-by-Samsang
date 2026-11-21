@@ -29,4 +29,5 @@ PRODUCT_CHARACTERISTICS := tablet
 # 按键与触摸配置
 PRODUCT_COPY_FILES += \
     device/samsung/rubenswifi/keylayout/gpio-keys.kl:recovery/root/system/usr/keylayout/gpio-keys.kl \
-    device/samsung/rubenswifi/idc/touch.idc:recovery/root/system/usr/idc/touch.idc
+    device/samsung/rubenswifi/idc/touch.idc:recovery/root/system/usr/idc/touch.idc \
+    device/samsung/rubenswifi/recovery/root/init.recovery.qcom.rc:recovery/root/init.recovery.qcom.rc

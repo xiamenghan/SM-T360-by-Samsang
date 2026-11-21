@@ -1,0 +1,16 @@
+# 由 init.rc 的 import /init.recovery.${ro.hardware}.rc 加载（ro.hardware=qcom）。
+# 目的：在 TWRP 主程序 /sbin/recovery 启动之前就把 USB(adb) 拉起来。
+# 这样即使 GUI/minui 初始化失败导致 recovery 退出，也能通过 adb 进去排查。
+# 注意：init.recovery.usb.rc 的 "on fs" 会先把 enable 写成 0，所以必须在 "on boot" 里重新打开。
+
+on boot
+    setprop service.adb.root 1
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 18D1
+    write /sys/class/android_usb/android0/idProduct D001
+    write /sys/class/android_usb/android0/f_ffs/aliases adb
+    write /sys/class/android_usb/android0/functions adb
+    write /sys/class/android_usb/android0/iManufacturer Google
+    write /sys/class/android_usb/android0/iProduct TWRP
+    write /sys/class/android_usb/android0/enable 1
+    start adbd
