@@ -65,7 +65,10 @@ enable_opt CONFIG_REGULATOR_MAX77804K "$DST"
 enable_opt CONFIG_EXTCON_MAX77804K "$DST"
 enable_opt CONFIG_ADC_ONESHOT "$DST"
 enable_opt CONFIG_MUIC_MAX77804K_SUPPORT_LANHUB "$DST"
-# 原厂明确关闭 CONFIG_MAX77804K_MUIC（本内核也没有该驱动），不要再打开
+# MAX77804K 的 MUID/OTG 回调与 EXTCON 驱动是二选一：
+# muic_otg_control 由 drivers/extcon/extcon-max77804k.c 定义（依赖 EXTCON_MAX77804K），
+# 两个都开会重复定义，两个都不开则 board 文件链接时 undefined reference。
+# 三星原厂的选择是 EXTCON=y + MUIC 关闭，这里保持一致。
 disable_opt CONFIG_MAX77804K_MUIC "$DST"
 
 # 触摸：rubens 使用 Synaptics RMI4（DTS 节点 compatible = "synaptics,rmi4-ts"）。
