@@ -47,8 +47,11 @@ TARGET_KERNEL_SOURCE := kernel/samsung/msm8226
 BOARD_KERNEL_IMAGE_NAME := zImage
 
 BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 androidboot.bootdevice=msm_sdcc.1
-BOARD_KERNEL_BASE := 0x00008000
+# mkbootimg 的最终地址 = base + offset。SM-T360 要求 kernel 0x00008000、
+# ramdisk 0x02000000、tags 0x01e00000；base 误设为 0x8000 会让全部地址错位。
+BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 2048
+BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --second_offset 0x00f00000 --tags_offset 0x01e00000
 BOARD_KERNEL_SEPARATED_DT := true
 BOARD_DTBTOOL_ARGS := -2
 
