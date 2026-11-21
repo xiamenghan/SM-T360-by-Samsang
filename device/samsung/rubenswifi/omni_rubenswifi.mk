@@ -5,6 +5,10 @@
 # 不含 LineageOS 的 vendor/lineage 与 msm8226-common，需要自包含
 #
 
+# 最小系统基础模块：recoveryimage 的 baseline ramdisk 依赖这里安装 init/recovery。
+# 缺少此继承会编译出没有 /init 和 /sbin/recovery 的不可启动镜像。
+$(call inherit-product, $(SRC_TARGET_DIR)/product/embedded.mk)
+
 # TWRP 基座：9.0 manifest 在 vendor/omni，8.1 manifest 可能在 vendor/twrp
 ifneq ($(wildcard vendor/omni/config/common.mk),)
 $(call inherit-product, vendor/omni/config/common.mk)

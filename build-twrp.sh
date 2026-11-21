@@ -88,6 +88,29 @@ if [ $BUILD_RC -ne 0 ]; then
     exit $BUILD_RC
 fi
 
+# recoveryimage 在依赖配置不完整时也可能返回成功，必须检查实际启动入口。
+RECOVERY_ROOT="$OUT/recovery/root"
+MISSING=0
+for f in init sbin/recovery sbin/ueventd sbin/twrp sbin/adbd \
+         init.recovery.service.rc init.recovery.usb.rc etc/recovery.fstab; do
+    if [ ! -e "$RECOVERY_ROOT/$f" ]; then
+        echo "!! recovery ramdisk 缺少 $f"
+        MISSING=1
+    else
+        echo "    OK: $f"
+    fi
+done
+if [ $MISSING -ne 0 ]; then
+    echo "!! 拒绝生成不含完整启动入口的 recovery 产物"
+    exit 1
+fi
+
+IMAGE_SIZE=$(stat -c%s "$OUT/recovery.img")
+if [ "$IMAGE_SIZE" -gt 10485760 ]; then
+    echo "!! recovery.img 为 $IMAGE_SIZE 字节，超过 10,485,760 字节分区上限"
+    exit 1
+fi
+
 echo
 echo "==> 产物："
 ls -lh "$OUT"/recovery.img
