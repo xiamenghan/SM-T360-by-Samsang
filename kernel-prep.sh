@@ -57,22 +57,15 @@ enable_opt CONFIG_LEDS_MAX77804K "$DST"
 # MAX77804K_CHGIN_IM 等中断位定义在 max77804k_charger.h，
 # 只有开启 CONFIG_CHARGER_MAX77804K 才会被 max77804k.h->sec_charger.h 引入
 enable_opt CONFIG_CHARGER_MAX77804K "$DST"
-# 以下三项对齐三星原厂 variant defconfig（msm8926-sec_rubenslte_defconfig）：
+# 以下选项对齐三星原厂 variant defconfig（msm8926-sec_rubenslte_defconfig）：
 #   - REGULATOR_MAX77804K：safeout 等 3 路 regulator，缺失会让依赖它的设备 probe 失败
-#   - EXTCON_MAX77804K：USB/充电器线缆检测（MUIC），缺失时 android_usb 收不到插线状态
-#   - ADC_ONESHOT / LANHUB 为 extcon 的配套子选项（原厂均开启）
-# 注意：基底 defconfig 是 "# CONFIG_EXTCON is not set"，不先把 EXTCON 总开关打开，
-# EXTCON_MAX77804K 会被 kconfig 静默丢弃（表现为 muic_otg_control 未定义）。
-enable_opt CONFIG_EXTCON "$DST"
+# 注意（2026-11-21 实测，勿重复踩）：
+#   - 原厂用 EXTCON_MAX77804K + 关闭 MAX77804K_MUIC 来提供 muic_otg_control；
+#     但在本社区内核上，extcon-max77804k.c 会引用未编译的 mxt_tsp_register_callback
+#     （IR remocon 也有同样问题），导致链接失败。
+#   - 因此这里保留「MAX77804K_MUIC=y + EXTCON 关闭」这条被验证可编译的路径。
 enable_opt CONFIG_REGULATOR_MAX77804K "$DST"
-enable_opt CONFIG_EXTCON_MAX77804K "$DST"
-enable_opt CONFIG_ADC_ONESHOT "$DST"
-enable_opt CONFIG_MUIC_MAX77804K_SUPPORT_LANHUB "$DST"
-# MAX77804K 的 MUID/OTG 回调与 EXTCON 驱动是二选一：
-# muic_otg_control 由 drivers/extcon/extcon-max77804k.c 定义（依赖 EXTCON_MAX77804K），
-# 两个都开会重复定义，两个都不开则 board 文件链接时 undefined reference。
-# 三星原厂的选择是 EXTCON=y + MUIC 关闭，这里保持一致。
-disable_opt CONFIG_MAX77804K_MUIC "$DST"
+enable_opt CONFIG_MAX77804K_MUIC "$DST"
 
 # 触摸：rubens 使用 Synaptics RMI4（DTS 节点 compatible = "synaptics,rmi4-ts"）。
 # 基底 defconfig 未开触摸驱动，TWRP 会完全没有触摸。
