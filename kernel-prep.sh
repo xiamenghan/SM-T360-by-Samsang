@@ -54,10 +54,23 @@ done
 # IR 遥控驱动引用的 set_led_flash 只在 CONFIG_LEDS_MAX77804K 下编译
 enable_opt CONFIG_MFD_MAX77804K "$DST"
 enable_opt CONFIG_LEDS_MAX77804K "$DST"
-enable_opt CONFIG_MAX77804K_MUIC "$DST"
 # MAX77804K_CHGIN_IM 等中断位定义在 max77804k_charger.h，
 # 只有开启 CONFIG_CHARGER_MAX77804K 才会被 max77804k.h->sec_charger.h 引入
 enable_opt CONFIG_CHARGER_MAX77804K "$DST"
+# 以下三项对齐三星原厂 variant defconfig（msm8926-sec_rubenslte_defconfig）：
+#   - REGULATOR_MAX77804K：safeout 等 3 路 regulator，缺失会让依赖它的设备 probe 失败
+#   - EXTCON_MAX77804K：USB/充电器线缆检测（MUIC），缺失时 android_usb 收不到插线状态
+#   - ADC_ONESHOT / LANHUB 为 extcon 的配套子选项（原厂均开启）
+enable_opt CONFIG_REGULATOR_MAX77804K "$DST"
+enable_opt CONFIG_EXTCON_MAX77804K "$DST"
+enable_opt CONFIG_ADC_ONESHOT "$DST"
+enable_opt CONFIG_MUIC_MAX77804K_SUPPORT_LANHUB "$DST"
+# 原厂明确关闭 CONFIG_MAX77804K_MUIC（本内核也没有该驱动），不要再打开
+disable_opt CONFIG_MAX77804K_MUIC "$DST"
+
+# 触摸：rubens 使用 Synaptics RMI4（DTS 节点 compatible = "synaptics,rmi4-ts"）。
+# 基底 defconfig 未开触摸驱动，TWRP 会完全没有触摸。
+enable_opt CONFIG_TOUCHSCREEN_SYNAPTICS_I2C_RMI4 "$DST"
 
 # matisse 用的 SM5502 MUIC / SMB358 充电器与 rubens 的 MAX77804K 方案冲突，必须关掉
 disable_opt CONFIG_SM5502_MUIC "$DST"
@@ -111,15 +124,25 @@ else
     echo "    已是精简状态，跳过"
 fi
 
-echo "==> 3/4 修补 mdnie 的 rubens 头文件引用"
+echo "==> 3/4 修补驱动"
 # 社区内核的 mdnie 驱动缺 CONFIG_SEC_RUBENS_PROJECT 分支，
 # 导致 COLOR_BLIND_1..6 未定义（这些符号在 mdnie_tft_data_rubens.h 中）
 MDNIE=drivers/video/msm/mdss/mdnie_tft_msm8x26.c
 if grep -q "mdnie_tft_data_rubens.h" "$MDNIE"; then
-    echo "    已包含，跳过"
+    echo "    mdnie 已包含，跳过"
 else
     sed -i '/#include "mdnie_tft_data_millet.h"/a #elif defined(CONFIG_SEC_RUBENS_PROJECT)\n#include "mdnie_tft_data_rubens.h"' "$MDNIE"
-    echo "    → 已插入 rubens 分支"
+    echo "    → mdnie 已插入 rubens 分支"
+fi
+
+# rubens 的 DTS 触摸节点是 compatible = "synaptics,rmi4-ts"，
+# 而社区内核 rmi4 驱动的 of_match 只有 "synaptics,rmi4"，不改的话触摸 probe 不到。
+TOUCH=drivers/input/touchscreen/synaptics_i2c_rmi4.c
+if grep -q 'synaptics,rmi4-ts' "$TOUCH"; then
+    echo "    触摸 of_match 已包含 rubens 兼容串，跳过"
+else
+    sed -i '/compatible = "synaptics,rmi4"/a\	{ .compatible = "synaptics,rmi4-ts",},' "$TOUCH"
+    echo "    → 触摸 of_match 已加入 synaptics,rmi4-ts"
 fi
 
 echo "==> 4/4 检查 DTS 与 dtb 列表"

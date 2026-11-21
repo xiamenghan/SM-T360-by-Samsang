@@ -46,7 +46,18 @@ TARGET_KERNEL_SOURCE := kernel/samsung/msm8226
 # msm 3.4 内核产物是 zImage；缺此变量时构建系统会拿 arch/arm/boot/ 目录当文件拷贝
 BOARD_KERNEL_IMAGE_NAME := zImage
 
-BOARD_KERNEL_CMDLINE := console=null androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 androidboot.bootdevice=msm_sdcc.1
+# 必须与原厂 recovery 的 cmdline 对齐：
+#   - lcd_id=0x5e8c10 是 mdss_sdc_wxga_dsi_panel.c 里 __setup("lcd_id=0x") 的开关，
+#     缺失时 lcd_attached=0，面板初始化函数全部 early-return，屏幕永远停在开机 logo。
+#   - mdss_mdp.panel 指定 rubens 的面板节点（与 dsi_panel_sdc_wxga_video_rubenslte.dtsi 内
+#     的节点名一致），否则 mdss 可能选不到面板。
+#   - samsung.* / androidboot.boot_recovery 等为三星 LK 与 init 依赖的参数。
+BOARD_KERNEL_CMDLINE := console=null androidboot.console=null androidboot.hardware=qcom user_debug=23 \
+    lcd_id=0x5e8c10 pmic_info=3 androidboot.debug_level=0x4f4c sec_debug.enable=0 sec_debug.enable_user=0 \
+    samsung.hardware=SM-T360 samsung.board_rev=3 androidboot.emmc_checksum=3 \
+    androidboot.bootloader=T360XXS1BRI2 androidboot.boot_recovery=1 androidboot.sec_atd.tty=/dev/ttyHSL0 \
+    msm_rtb.filter=0x37 ehci-hcd.park=3 androidboot.bootdevice=msm_sdcc.1 \
+    mdss_mdp.panel=1:dsi:0:qcom,mdss_dsi_sdc_wxga_video_lte
 # mkbootimg 的最终地址 = base + offset。SM-T360 要求 kernel 0x00008000、
 # ramdisk 0x02000000、tags 0x01e00000；base 误设为 0x8000 会让全部地址错位。
 BOARD_KERNEL_BASE := 0x00000000
