@@ -7,6 +7,9 @@
 /dev/block/platform/msm_sdcc.1/by-name/efs                  /efs                   ext4    nosuid,nodev,noatime,barrier=1                       wait,check
 /dev/block/platform/msm_sdcc.1/by-name/persdata             /persdata/absolute     ext4    nosuid,nodev,noatime,barrier=1                       wait,check
 /dev/block/platform/msm_sdcc.1/by-name/modem                /firmware              vfat    ro,shortname=lower,uid=1000,gid=1000,dmask=227,fmask=337 wait
+# TWRP 专用：boot / recovery 分区，用于备份和刷写镜像
+/dev/block/platform/msm_sdcc.1/by-name/boot                 /boot                  emmc    defaults                                             backup=1;flashimg=1
+/dev/block/platform/msm_sdcc.1/by-name/recovery             /recovery              emmc    defaults                                             backup=1;flashimg=1
 # 外置 SD（可拆后盖更换）与 USB OTG
 /devices/platform/msm_sdcc.2/mmc_host/mmc1                  auto                   auto    defaults                                             voldmanaged=sdcard1:auto
 /devices/platform/msm_hsusb                                 auto                   auto    defaults                                             voldmanaged=usb:auto
