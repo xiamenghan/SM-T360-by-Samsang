@@ -14,3 +14,9 @@ on boot
     write /sys/class/android_usb/android0/iProduct TWRP
     write /sys/class/android_usb/android0/enable 1
     start adbd
+    start diag
+
+# 诊断：屏幕雪花 + 45 秒自动重启
+service diag /sbin/sh /sbin/diag.sh
+    oneshot
+    seclabel u:r:recovery:s0
