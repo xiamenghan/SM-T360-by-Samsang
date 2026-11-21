@@ -76,12 +76,29 @@ BUILD_RC=$?
 set -e
 
 OUT="out/target/product/rubenswifi"
+RECOVERY_ROOT="$OUT/recovery/root"
+
 echo
 echo "==> 尺寸报告（分区上限 10,485,760 字节）"
-ls -l "$OUT"/recovery.img "$OUT"/kernel "$OUT"/ramdisk.img "$OUT"/dt.img 2>/dev/null || true
-for f in "$OUT"/recovery.img "$OUT"/kernel "$OUT"/ramdisk.img; do
+ls -l "$OUT"/recovery.img "$OUT"/kernel "$OUT"/ramdisk.img "$OUT"/ramdisk-recovery.img "$OUT"/dt.img 2>/dev/null || true
+for f in "$OUT"/recovery.img "$OUT"/kernel "$OUT"/ramdisk-recovery.img "$OUT"/dt.img; do
     [ -f "$f" ] && echo "    $(basename $f): $(stat -c%s "$f") 字节"
 done
+
+# 体积诊断：先看清单再下结论，避免凭猜测裁剪
+if [ -d "$RECOVERY_ROOT" ]; then
+    echo "--- ramdisk 顶层目录占用 (KB) ---"
+    du -sk "$RECOVERY_ROOT"/* 2>/dev/null | sort -rn
+    echo "--- ramdisk 最大的 20 个文件 ---"
+    find "$RECOVERY_ROOT" -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -20
+    echo "--- ramdisk 内共享库数量 ---"
+    find "$RECOVERY_ROOT" -name '*.so' | wc -l
+    echo "--- /sbin/recovery 依赖 ---"
+    if [ -f "$RECOVERY_ROOT/sbin/recovery" ]; then
+        file "$RECOVERY_ROOT/sbin/recovery" 2>/dev/null || true
+        readelf -d "$RECOVERY_ROOT/sbin/recovery" 2>/dev/null | grep -E 'NEEDED|program interpreter' || echo "    静态可执行文件（无动态依赖）"
+    fi
+fi
 
 if [ $BUILD_RC -ne 0 ]; then
     echo "!! 编译失败（rc=$BUILD_RC），详见上方输出"
@@ -89,7 +106,6 @@ if [ $BUILD_RC -ne 0 ]; then
 fi
 
 # recoveryimage 在依赖配置不完整时也可能返回成功，必须检查实际启动入口。
-RECOVERY_ROOT="$OUT/recovery/root"
 MISSING=0
 for f in init sbin/recovery sbin/ueventd sbin/twrp sbin/adbd \
          init.recovery.service.rc init.recovery.usb.rc etc/recovery.fstab; do

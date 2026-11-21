@@ -97,5 +97,12 @@ TW_EXCLUDE_SUPERSU := true
 TW_EXCLUDE_TWRPAPP := true
 TWRP_INCLUDE_ADDON := false
 
+# recovery 分区只有 10MB，去掉体积大且非必需的组件：
+# busybox 全套软链、nano、bash、python3。shell 工具改用 toolbox/toybox。
+TW_USE_TOOLBOX := true
+TW_EXCLUDE_NANO := true
+TW_EXCLUDE_BASH := true
+TW_EXCLUDE_PYTHON := true
+
 # ---------------------------------------------------------------- 其他
 TARGET_SPECIFIC_HEADER_PATH += $(DEVICE_PATH)/include
