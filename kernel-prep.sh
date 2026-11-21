@@ -61,6 +61,9 @@ enable_opt CONFIG_CHARGER_MAX77804K "$DST"
 #   - REGULATOR_MAX77804K：safeout 等 3 路 regulator，缺失会让依赖它的设备 probe 失败
 #   - EXTCON_MAX77804K：USB/充电器线缆检测（MUIC），缺失时 android_usb 收不到插线状态
 #   - ADC_ONESHOT / LANHUB 为 extcon 的配套子选项（原厂均开启）
+# 注意：基底 defconfig 是 "# CONFIG_EXTCON is not set"，不先把 EXTCON 总开关打开，
+# EXTCON_MAX77804K 会被 kconfig 静默丢弃（表现为 muic_otg_control 未定义）。
+enable_opt CONFIG_EXTCON "$DST"
 enable_opt CONFIG_REGULATOR_MAX77804K "$DST"
 enable_opt CONFIG_EXTCON_MAX77804K "$DST"
 enable_opt CONFIG_ADC_ONESHOT "$DST"
@@ -114,7 +117,7 @@ done
 enable_opt CONFIG_RD_XZ "$DST"
 
 echo "    → $DST 已生成"
-grep -E "^(CONFIG_ARCH_MSM8226|CONFIG_SEC_RUBENS|CONFIG_MACH_RUBENS|CONFIG_MFD_MAX77804K|CONFIG_LEDS_MAX77804K|CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL)" "$DST" | sed 's/^/       /'
+grep -E "^(CONFIG_ARCH_MSM8226|CONFIG_SEC_RUBENS|CONFIG_MACH_RUBENS|CONFIG_MFD_MAX77804K|CONFIG_REGULATOR_MAX77804K|CONFIG_EXTCON|CONFIG_LEDS_MAX77804K|CONFIG_CHARGER_MAX77804K|CONFIG_TOUCHSCREEN_SYNAPTICS_I2C_RMI4|CONFIG_FB_MSM_MDSS_SDC_WXGA_PANEL)" "$DST" | sed 's/^/       /'
 
 echo "==> 2/4 精简 dtb 列表（丢 r00/r01，保留 r02/r03/r04）"
 # 本机 ro.revision=3。r00/r01 是最早期工程样机版本，量产机不会命中，
